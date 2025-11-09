@@ -1,0 +1,24 @@
+# Core AI & Google STT
+google-cloud-speech==2.26.0
+openai>=1.40.0
+
+# Environment Variables
+python-dotenv==1.0.1
+
+# Optional (if converting/handling audio)
+pydub==0.25.1
+
+# Web Framework (for Twilio Webhook / APIs later)
+fastapi==0.115.0
+uvicorn==0.30.0
+
+# Twilio for phone calling integration
+twilio==9.2.3
+
+# Google Calendar API (for appointment booking – future)
+google-api-python-client==2.155.0
+google-auth==2.34.0
+google-auth-oauthlib==1.2.1
+
+# Utilities
+requests==2.32.3
