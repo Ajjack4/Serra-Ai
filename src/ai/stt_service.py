@@ -48,7 +48,7 @@ except Exception:  # pragma: no cover
     pass
 
 
-Provider = Literal["google", "whisper"]
+Provider = Literal["google", "whisper","whisper-local"]
 
 
 @dataclass
@@ -103,6 +103,8 @@ class STTService:
             self._init_google()
         elif self.cfg.provider == "whisper":
             self._init_whisper()
+        elif self.cfg.provider == "whisper-local":  # Local Whisper (no API, runs on CPU/GPU)
+            self.logger.info("Using local Whisper model — no API key or remote setup required.")
         else:
             raise ValueError(f"Unsupported STT provider: {self.cfg.provider}")
 
@@ -146,6 +148,8 @@ class STTService:
             return self._google_transcribe_file(file_path)
         elif self.cfg.provider == "whisper":
             return self._whisper_transcribe_file(file_path)
+        elif self.cfg.provider == "whisper-local":
+            return self._whisper_local_transcribe_file(file_path)
         else:  # pragma: no cover
             raise ValueError(f"Unsupported provider: {self.cfg.provider}")
 
@@ -254,6 +258,29 @@ class STTService:
             confidence=None,  # Whisper API does not provide confidence
             words=None,
             raw=transcription,
+        )
+        # -----------------------------
+# Whisper Local (Offline) STT
+# -----------------------------
+    def _whisper_local_transcribe_file(self, file_path: str) -> STTResult:
+        try:
+            import whisper
+        except ImportError:
+            raise ImportError("Please install Whisper with: pip install openai-whisper")
+
+    # Load model (tiny, base, small, medium, large)
+        model_name = self.cfg.whisper_model or "base"
+        self.logger.info(f"Loading Whisper local model: {model_name}")
+        model = whisper.load_model(model_name)
+
+        result = model.transcribe(file_path, language=self.cfg.language_code.split('-')[0])
+
+        return STTResult(
+            text=result.get("text", "").strip(),
+            language_code=self.cfg.language_code,
+            confidence=None,
+            words=None,
+            raw=result
         )
 
 
